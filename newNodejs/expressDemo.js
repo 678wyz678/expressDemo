@@ -1,9 +1,9 @@
 const express = require('express')
 const app = express()
-
+app.listen(7777);
 app.all('/', (req, res) => res.send('hello') );
-app.listen();
 
+console.log('app端口7777监听中')
 app.get("/api/timestamp/", (req, res) => {
     res.json({ unix: Date.now(), utc: Date() });
 });
@@ -17,6 +17,8 @@ app.get("/api/timestamp/:date_string", (req, res) => {
         var dateInt = parseInt(dateString);
         //Date regards numbers as unix timestamps, strings are processed differently
         res.json({ unix: dateString, utc: new Date(dateInt).toUTCString() });
+    }else{
+        res.json({error:"请输入5位数以上"})
     }
 
     let dateObject = new Date(dateString);
