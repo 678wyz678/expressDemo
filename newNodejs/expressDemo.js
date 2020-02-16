@@ -17,8 +17,6 @@ app.get("/api/timestamp/:date_string", (req, res) => {
         var dateInt = parseInt(dateString);
         //Date regards numbers as unix timestamps, strings are processed differently
         res.json({ unix: dateString, utc: new Date(dateInt).toUTCString() });
-    }else{
-        res.json({error:"请输入5位数以上"})
     }
 
     let dateObject = new Date(dateString);
