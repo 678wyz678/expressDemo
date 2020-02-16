@@ -1,0 +1,23 @@
+{
+  "name": "newnodejs",
+  "version": "1.0.0",
+  "description": "nodeJsDemo",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node expressDemo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "private": true
+  },
+  "author": "wyz",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.3",
+    "mongoose": "^5.9.1",
+    "webpack": "^4.41.6"
+  }
+}
