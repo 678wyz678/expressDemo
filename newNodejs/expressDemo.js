@@ -2,30 +2,77 @@ const express = require('express')
 const app = express()
 const sha256 = require('sha256')
 const dns = require('dns')
-// app.listen(7777);
-// app.all('/', (req, res) => res.send('hello'));
-// var cookieParser = require('cookie-parser')
-// app.use(cookieParser())
-// console.log('app端口7777监听中')
-// app.get("/api/timestamp/", (req, res) => {
-//     res.json({ unix: Date.now(), utc: Date() });
-// });
+const mongoose = require("mongoose")
+const Schema = mongoose.Schema
 
-dns.lookup("www.github.com", function (err, addr) {
-    if (err) { console.log(err) }
-    console.log(addr)
-    dns.reverse(addr, function(err, hostname){
-        if(err){console.log(err)}
-        console.log(JSON.stringify(hostname))
-    })
+
+app.listen(7777);
+console.log('app端口7777监听中')
+app.all('/', (req, res) => res.send('hello'));
+
+const urlSchema = new Schema({
+    url_id: { type: String, required: true },
+    url: { type: String, required: true }
+}, { versionKey: false });
+
+const Url = mongoose.model('Url', urlSchema)
+
+var db = mongoose.connection
+
+app.get("/api/shorturl/new-(http:\/\/|https:\/\/)?:data?", (req, res) => {
+    // console.log(req.params.data)
+    // console.log(/^www\.[0-9a-z]+(\.com|\.cn)(\.cn)?$/.test(req.params.data))
+    
+    if (/^www\.[0-9a-z]+(\.com|\.cn)(\.cn)?$/.test(req.params.data)) {
+        dns.lookup(req.params.data, function (err, addr) {
+            if (err) { res.json({ "error": "invalid URL" }); console.log(err); return }
+            mongoose.connect('mongodb://localhost/test', { useNewUrlParser: true, useUnifiedTopology: true })
+            let hostname = this.hostname
+            // console.log(this.hostname)
+            mongoose.connect('mongodb://localhost/test', { useNewUrlParser: true, useUnifiedTopology: true })
+            // console.log(db.readyState)
+            db.on('connected', function () {
+                // we're connected!
+                console.log("we're connected!")
+                if (addr) {
+                    console.log(addr)
+                    const id = sha256(hostname)
+                    var url = new Url({ url_id: id, url: hostname })
+
+                    Url.findOne({ url_id: url['url_id'] }, function (err, doc) {
+                        if (err) {
+                            console.log(err)
+                        }
+                        if (doc) {
+                            console.log('数据存在')
+                            console.log(doc)
+                            res.json({ original_url: doc['url'] })
+                            return
+                        }
+                        else {
+                            Url.create(url, function (err, doc) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                                console.log(doc)
+                                res.json({ original_url: doc['url'] })
+                                return
+                            })
+                        }
+                    })
+                }
+            })
+        })
+    }
+    else {
+        res.json({ "error": "http invalid URL" })
+    }
+    db.close()
+});
+
+app.use("*", function (req, res) {
+    res.json({ "error": "invalid URL" })
 })
-
-const a = sha256("www.github.com")
-const b = sha256("www.github.com")
-
-console.log(a)
-console.log(b)
-console.log(a===b)
 
 // app.get("/api/timestamp/:date_string", (req, res) => {
 //     let dateString = req.params.date_string;
